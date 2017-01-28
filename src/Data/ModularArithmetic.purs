@@ -1,75 +1,79 @@
--- | Just a proof of concept.
-
 module Data.ModularArithmetic
-  ( Modulus
-  , modulus
-  , IsNumber
+  ( Z
+  , mkZ
+  , runZ
+  , class Prime
+  , inverse
   ) where
 
-import Data.Function
+import Prelude
 import Type.Proxy
-import Debug.Trace
+import Data.Typelevel.Num (class Mul, class Nat, class Pos, class Succ, type (:*), D0, D1, D11, D2, D3, D5, D7, toInt)
+import Data.Typelevel.Undefined (undefined)
 
-class Modulus a where
-  modulus :: Proxy a -> Number
+-- | Integers modulo some number m.
+newtype Z m = Z Int
 
--- | A class with no members. The only 'law' is that if a type has an instance,
--- | it should have the same runtime representation as Number.
-class IsNumber a
+derive newtype instance showZ :: Show (Z m)
 
-foreign import coerceNumber
-  """
-  function coerceNumber(dict_ignored) {
-    return function(x) {
-      return x
-    }
-  }
-  """ :: forall a. (IsNumber a) => Number -> a
+mkZ :: forall m. (Pos m) => Int -> Z m
+mkZ x = Z (x `mod` toInt (undefined :: m))
 
-foreign import addImpl
-  """
-  function addImpl(dict_ignored) {
-    return function(modulus, x, y) {
-      var z = x + y;
-      return ((z % modulus) + modulus) % modulus;
-    }
-  }
-  """ :: forall a. (IsNumber a) => Fn3 Number a a a
+runZ :: forall m. Z m -> Int
+runZ (Z x) = x
 
-add :: forall a. (IsNumber a) => Number -> a -> a -> a
-add m x y = runFn3 addImpl m x y
+-- | Exponentation of natural numbers at the type level.
+class (Nat x, Nat y, Nat z) <= Exp x y z
 
-foreign import mulImpl
-  """
-  function mulImpl(dict_ignored) {
-    return function(modulus, x, y) {
-      var z = x * y;
-      return ((z % modulus) + modulus) % modulus;
-    }
-  }
-  """ :: forall a. (IsNumber a) => Fn3 Number a a a
+-- | exp(x, 0) = 1
+instance expZero :: Nat x => Exp x D0 D1
+-- | exp(x, y) = y * exp(x, y-1)
+instance expPos :: (Nat x, Nat o, Pos y, Succ y y1, Exp x y1 z, Mul y z o) => Exp x y o
 
-mul :: forall a. (IsNumber a) => Number -> a -> a -> a
-mul m x y = runFn3 mulImpl m x y
+class (Pos m) <= Prime m
 
-foreign import subImpl
-  """
-  function subImpl(dict_ignored) {
-    return function(modulus, x, y) {
-      var z = x - y;
-      return ((z % modulus) + modulus) % modulus;
-    }
-  }
-  """ :: forall a. (IsNumber a) => Fn3 Number a a a
+-- TODO: More primes
+instance prime2 :: Prime D2
+instance prime3 :: Prime D3
+instance prime5 :: Prime D5
+instance prime7 :: Prime D7
+instance prime11 :: Prime (D1 :* D1)
 
-sub :: forall a. (IsNumber a) => Number -> a -> a -> a
-sub m x y = runFn3 subImpl m x y
+-- A number of the form p^k, for some prime p and positive integer k.
+class PrimePower m
 
-instance modularSemiring :: (IsNumber a, Modulus a) => Semiring a where
-  (+) = add (modulus (Proxy :: Proxy a))
-  (*) = mul (modulus (Proxy :: Proxy a))
-  zero = coerceNumber 0
-  one = coerceNumber 1
+instance primePower :: (Prime p, Pos k, Exp p k q) => PrimePower q
 
-instance modularRing :: (IsNumber a, Modulus a) => Ring a where
-  (-) = sub (modulus (Proxy :: Proxy a))
+instance semiringZ :: (Pos m) => Semiring (Z m) where
+  add (Z x) (Z y) = mkZ (add x y)
+  mul (Z x) (Z y) = mkZ (mul x y)
+  zero = Z 0
+  one = Z 1
+
+instance ringZ :: (Pos m) => Ring (Z m) where
+  sub (Z x) (Z y) = mkZ (sub x y)
+
+instance commutativeRingZ :: (Pos m) => CommutativeRing (Z m)
+
+instance euclideanRingZ :: (Prime m) => EuclideanRing (Z m) where
+  degree = runZ
+  div x y = x * inverse y
+  mod x y = x - (div x y)
+
+-- | Compute a multiplicative inverse of some number in Z_m. Note that an
+-- | inverse is only guaranteed to exist if m is prime (which is required by a
+-- | constraint on this function).
+-- |
+-- | Adapted from https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Modular_integers
+inverse :: forall m. (Prime m) => Z m -> Z m
+inverse (Z a) = Z (go 0 n 1 a)
+  where
+    n = toInt (undefined :: m)
+
+    go t _ _ 0 =
+      if t < 0 then t + n else t
+    go t r newt newr =
+      let
+        quot = r / newr
+      in
+        go newt (t - quot * newt) newr (r - quot * newr)

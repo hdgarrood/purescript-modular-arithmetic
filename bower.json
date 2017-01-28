@@ -10,7 +10,10 @@
     "output"
   ],
   "dependencies": {
-    "purescript-math": "*",
-    "purescript-proxy": "*"
+    "purescript-typelevel": "^2.0.0",
+    "purescript-console": "^2.0.0"
+  },
+  "devDependencies": {
+    "purescript-psci-support": "^2.0.0"
   }
 }
