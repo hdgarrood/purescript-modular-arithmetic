@@ -17,7 +17,12 @@ newtype Z m = Z Int
 derive newtype instance showZ :: Show (Z m)
 
 mkZ :: forall m. (Pos m) => Int -> Z m
-mkZ x = Z (x `mod` toInt (undefined :: m))
+mkZ x =
+  let
+    m = toInt (undefined :: m)
+  in
+    -- This ensures that we get a number between 0 and m-1
+    Z (((x `mod` m) + m) `mod` m)
 
 runZ :: forall m. Z m -> Int
 runZ (Z x) = x
