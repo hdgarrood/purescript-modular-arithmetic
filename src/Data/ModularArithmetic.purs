@@ -4,10 +4,12 @@ module Data.ModularArithmetic
   , runZ
   , class Prime
   , inverse
+  , enumerate
   ) where
 
 import Prelude
 import Data.Array as Array
+import Data.NonEmpty (NonEmpty(..), (:|))
 import Data.Typelevel.Num (class Pos, type (:*), D1, D2, D3, D5, D7, toInt)
 import Data.Typelevel.Undefined (undefined)
 import Test.QuickCheck (class Arbitrary)
@@ -76,9 +78,15 @@ inverse (Z a) = mkZ (go 0 n 1 a)
       in
         go newt newr (t - quot * newt) (r - quot * newr)
 
+-- | List all members of Z_m.
+enumerate :: forall m. (Pos m) => NonEmpty Array (Z m)
+enumerate =
+  let
+    m = toInt (undefined :: m)
+  in
+    mkZ 0 :| (if m == 1 then [] else map mkZ (Array.range 1 (m - 1)))
+
 instance arbitraryZ :: (Pos m) => Arbitrary (Z m) where
   arbitrary =
-    let
-      m = toInt (undefined :: m)
-    in
-      map mkZ (elements 0 (Array.range 1 (m - 1)))
+    case enumerate of
+      x :| xs -> elements x xs
