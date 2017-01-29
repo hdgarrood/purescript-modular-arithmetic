@@ -11,9 +11,12 @@
   ],
   "dependencies": {
     "purescript-typelevel": "^2.0.0",
-    "purescript-console": "^2.0.0"
+    "purescript-console": "^2.0.0",
+    "purescript-quickcheck": "^3.1.1",
+    "purescript-arrays": "^3.2.0"
   },
   "devDependencies": {
-    "purescript-psci-support": "^2.0.0"
+    "purescript-psci-support": "^2.0.0",
+    "purescript-quickcheck-laws": "^2.1.0"
   }
 }
