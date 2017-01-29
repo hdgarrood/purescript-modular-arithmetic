@@ -1,5 +1,7 @@
 {
   "name": "purescript-modular-arithmetic",
+  "license": "MIT",
+  "author": "Harry Garrood <harry@garrood.me>",
   "moduleType": [
     "node"
   ],
