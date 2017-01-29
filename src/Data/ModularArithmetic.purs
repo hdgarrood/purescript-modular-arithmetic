@@ -9,7 +9,7 @@ module Data.ModularArithmetic
 
 import Prelude
 import Data.Array as Array
-import Data.NonEmpty (NonEmpty(..), (:|))
+import Data.NonEmpty (NonEmpty, (:|))
 import Data.Typelevel.Num (class Pos, type (:*), D1, D2, D3, D5, D7, toInt)
 import Data.Typelevel.Undefined (undefined)
 import Test.QuickCheck (class Arbitrary)
