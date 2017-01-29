@@ -15,13 +15,26 @@ import Data.Typelevel.Undefined (undefined)
 import Test.QuickCheck (class Arbitrary)
 import Test.QuickCheck.Gen (elements)
 
--- | Integers modulo some number m.
+-- | Integers modulo some positive integer m.
+-- |
+-- | The type argument should be a positive integer of the kind defined by [purescript-typelevel](https://pursuit.purescript.org/packages/purescript-typelevel).
+-- | This way, the modulus that you're working with is specified in the type. Note
+-- | that even though the modulus is captured at the type level, you can still use
+-- | modulus values which are not known at compile time, with the [`reifyIntP`](https://pursuit.purescript.org/packages/purescript-typelevel/2.0.0/docs/Data.Typelevel.Num.Sets#v:reifyIntP) function.
+-- |
+-- | This type forms a commutative ring for any positive integer m, and
+-- | additionally a field when m is prime. Unlike `Int` and `Number`, though,
+-- | all of these instances are *fully law-abiding*.
+-- |
+-- | The runtime representation is identical to that of `Int`, except that
+-- | values are guaranteed to be between 0 and m-1.
 newtype Z m = Z Int
 
 derive newtype instance eqZ :: Eq (Z m)
 derive newtype instance ordZ :: Ord (Z m)
 derive newtype instance showZ :: Show (Z m)
 
+-- | Smart constructor for `Z` values.
 mkZ :: forall m. (Pos m) => Int -> Z m
 mkZ x =
   let
@@ -30,9 +43,15 @@ mkZ x =
     -- This ensures that we get a number between 0 and m-1
     Z (((x `mod` m) + m) `mod` m)
 
+-- | Get at the underlying `Int`.
 runZ :: forall m. Z m -> Int
 runZ (Z x) = x
 
+-- | This class specifies that a type-level integer is *prime*; that is, it
+-- | has exactly 2 divisors: itself, and 1.
+-- |
+-- | Sadly, only a small number of primes have instances right now. Hopefully
+-- | this will change in the future.
 class (Pos m) <= Prime m
 
 -- TODO: More primes
@@ -63,8 +82,7 @@ instance fieldZ :: (Prime m) => Field (Z m)
 -- | Compute a multiplicative inverse of some number in Z_m. Note that an
 -- | inverse is only guaranteed to exist if m is prime (which is required by a
 -- | constraint on this function).
--- |
--- | Adapted from https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Modular_integers
+-- Adapted from https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Modular_integers
 inverse :: forall m. (Prime m) => Z m -> Z m
 inverse (Z a) = mkZ (go 0 n 1 a)
   where
