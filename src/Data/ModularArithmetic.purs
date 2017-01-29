@@ -8,8 +8,7 @@ module Data.ModularArithmetic
 
 import Prelude
 import Data.Array as Array
-import Type.Proxy
-import Data.Typelevel.Num (class Mul, class Nat, class Pos, class Succ, type (:*), D0, D1, D11, D2, D3, D5, D7, toInt)
+import Data.Typelevel.Num (class Pos, type (:*), D1, D2, D3, D5, D7, toInt)
 import Data.Typelevel.Undefined (undefined)
 import Test.QuickCheck (class Arbitrary)
 import Test.QuickCheck.Gen (elements)
@@ -32,14 +31,6 @@ mkZ x =
 runZ :: forall m. Z m -> Int
 runZ (Z x) = x
 
--- | Exponentation of natural numbers at the type level.
-class (Nat x, Nat y, Nat z) <= Exp x y z
-
--- | exp(x, 0) = 1
-instance expZero :: Nat x => Exp x D0 D1
--- | exp(x, y) = y * exp(x, y-1)
-instance expPos :: (Nat x, Nat o, Pos y, Succ y y1, Exp x y1 z, Mul y z o) => Exp x y o
-
 class (Pos m) <= Prime m
 
 -- TODO: More primes
@@ -48,11 +39,6 @@ instance prime3 :: Prime D3
 instance prime5 :: Prime D5
 instance prime7 :: Prime D7
 instance prime11 :: Prime (D1 :* D1)
-
--- A number of the form p^k, for some prime p and positive integer k.
-class PrimePower m
-
-instance primePower :: (Prime p, Pos k, Exp p k q) => PrimePower q
 
 instance semiringZ :: (Pos m) => Semiring (Z m) where
   add (Z x) (Z y) = mkZ (add x y)
