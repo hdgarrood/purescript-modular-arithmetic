@@ -35,7 +35,7 @@ derive newtype instance ordZ :: Ord (Z m)
 derive newtype instance showZ :: Show (Z m)
 
 -- | Smart constructor for `Z` values.
-mkZ :: forall m. (Pos m) => Int -> Z m
+mkZ :: forall m. Pos m => Int -> Z m
 mkZ x =
   let
     m = toInt (undefined :: m)
@@ -52,7 +52,7 @@ runZ (Z x) = x
 -- |
 -- | Sadly, only a small number of primes have instances right now. Hopefully
 -- | this will change in the future.
-class (Pos m) <= Prime m
+class Pos m <= Prime m
 
 -- TODO: More primes
 instance prime2 :: Prime D2
@@ -61,29 +61,29 @@ instance prime5 :: Prime D5
 instance prime7 :: Prime D7
 instance prime11 :: Prime (D1 :* D1)
 
-instance semiringZ :: (Pos m) => Semiring (Z m) where
+instance semiringZ :: Pos m => Semiring (Z m) where
   add (Z x) (Z y) = mkZ (add x y)
   mul (Z x) (Z y) = mkZ (mul x y)
   zero = Z 0
   one = Z 1
 
-instance ringZ :: (Pos m) => Ring (Z m) where
+instance ringZ :: Pos m => Ring (Z m) where
   sub (Z x) (Z y) = mkZ (sub x y)
 
-instance commutativeRingZ :: (Pos m) => CommutativeRing (Z m)
+instance commutativeRingZ :: Pos m => CommutativeRing (Z m)
 
-instance euclideanRingZ :: (Prime m) => EuclideanRing (Z m) where
+instance euclideanRingZ :: Prime m => EuclideanRing (Z m) where
   degree _ = 1
   div x y = x * inverse y
   mod _ _ = Z 0
 
-instance fieldZ :: (Prime m) => Field (Z m)
+instance fieldZ :: Prime m => Field (Z m)
 
 -- | Compute a multiplicative inverse of some number in Z_m. Note that an
 -- | inverse is only guaranteed to exist if m is prime (which is required by a
 -- | constraint on this function).
 -- Adapted from https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Modular_integers
-inverse :: forall m. (Prime m) => Z m -> Z m
+inverse :: forall m. Prime m => Z m -> Z m
 inverse (Z a) = mkZ (go 0 n 1 a)
   where
     n = toInt (undefined :: m)
@@ -97,14 +97,12 @@ inverse (Z a) = mkZ (go 0 n 1 a)
         go newt newr (t - quot * newt) (r - quot * newr)
 
 -- | List all members of Z_m.
-enumerate :: forall m. (Pos m) => NonEmpty Array (Z m)
+enumerate :: forall m. Pos m => NonEmpty Array (Z m)
 enumerate =
   let
     m = toInt (undefined :: m)
   in
     mkZ 0 :| (if m == 1 then [] else map mkZ (Array.range 1 (m - 1)))
 
-instance arbitraryZ :: (Pos m) => Arbitrary (Z m) where
-  arbitrary =
-    case enumerate of
-      x :| xs -> elements x xs
+instance arbitraryZ :: Pos m => Arbitrary (Z m) where
+  arbitrary = elements enumerate

@@ -16,14 +16,14 @@
     "url": "https://github.com/hdgarrood/purescript-modular-arithmetic"
   },
   "dependencies": {
-    "purescript-typelevel": "^2.0.0",
-    "purescript-console": "^2.0.0",
-    "purescript-quickcheck": "^3.1.1",
-    "purescript-arrays": "^3.2.0",
-    "purescript-nonempty": "^3.0.0"
+    "purescript-typelevel": "^3.0.0",
+    "purescript-console": "^3.0.0",
+    "purescript-quickcheck": "^4.0.0",
+    "purescript-arrays": "^4.0.1",
+    "purescript-nonempty": "^4.0.0"
   },
   "devDependencies": {
-    "purescript-psci-support": "^2.0.0",
-    "purescript-quickcheck-laws": "^2.1.0"
+    "purescript-psci-support": "^3.0.0",
+    "purescript-quickcheck-laws": "^3.0.0"
   }
 }
