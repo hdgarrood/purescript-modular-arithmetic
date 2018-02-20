@@ -1,28 +1,39 @@
 module Test.Main where
 
 import Prelude
-import Data.ModularArithmetic
-import Control.Monad.Eff.Console (logShow)
+
+import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Console (CONSOLE)
+import Control.Monad.Eff.Exception (EXCEPTION)
+import Control.Monad.Eff.Random (RANDOM)
+import Data.ModularArithmetic (class Prime, Z, genZ, inverse)
 import Data.Typelevel.Num (D11)
-import Test.QuickCheck (class Arbitrary, Result, arbitrary, quickCheck, (<?>))
-import Test.QuickCheck.Gen (elements)
-import Test.QuickCheck.Laws.Data (checkCommutativeRing, checkEuclideanRing, checkField, checkRing, checkSemiring)
-import Type.Proxy (Proxy(..))
+import Test.QuickCheck (Result, quickCheck, (<?>))
+import Test.QuickCheck.Gen (Gen)
+import Test.QuickCheck.Laws.Data (checkCommutativeRingGen, checkEuclideanRingGen, checkFieldGen, checkRingGen, checkSemiringGen)
 
 type Z11 = Z D11
 
+main
+  :: forall eff
+   . Eff
+     ( console :: CONSOLE
+     , random :: RANDOM
+     , exception :: EXCEPTION
+     | eff )
+     Unit
 main = do
-  let p = Proxy :: Proxy Z11
+  let gen = genZ :: Gen Z11
 
-  quickCheck (inverses :: Z11 -> _)
+  quickCheck $ (inverses :: Z11 -> Result) <$> gen
 
-  checkSemiring p
-  checkRing p
-  checkCommutativeRing p
-  checkEuclideanRing p
-  checkField p
+  checkSemiringGen gen
+  checkRingGen gen
+  checkCommutativeRingGen gen
+  checkEuclideanRingGen gen
+  checkFieldGen gen
 
-inverses :: forall m. (Prime m) => Z m -> Result
+inverses :: forall m. Prime m => Z m -> Result
 inverses x = go <?> "x: " <> show x
   where
     go

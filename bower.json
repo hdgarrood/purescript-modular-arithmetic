@@ -18,12 +18,13 @@
   "dependencies": {
     "purescript-typelevel": "^3.0.0",
     "purescript-console": "^3.0.0",
-    "purescript-quickcheck": "^4.0.0",
     "purescript-arrays": "^4.0.1",
-    "purescript-nonempty": "^4.0.0"
+    "purescript-nonempty": "^4.0.0",
+    "purescript-gen": "^1.1.1"
   },
   "devDependencies": {
     "purescript-psci-support": "^3.0.0",
-    "purescript-quickcheck-laws": "^3.0.0"
+    "purescript-quickcheck": "^4.0.0",
+    "purescript-quickcheck-laws": "matthewleon/purescript-quickcheck-laws#arbitraryless"
   }
 }

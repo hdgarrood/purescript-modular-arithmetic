@@ -5,18 +5,18 @@ module Data.ModularArithmetic
   , class Prime
   , inverse
   , enumerate
+  , genZ
   ) where
 
 import Prelude
 
+import Control.Monad.Gen (class MonadGen, chooseInt)
 import Data.Array as Array
 import Data.Enum (class BoundedEnum, class Enum, Cardinality(..))
 import Data.Maybe (Maybe(..))
 import Data.NonEmpty (NonEmpty, (:|))
 import Data.Typelevel.Num (class Pos, type (:*), D1, D2, D3, D5, D7, toInt)
 import Data.Typelevel.Undefined (undefined)
-import Test.QuickCheck (class Arbitrary)
-import Test.QuickCheck.Gen (elements)
 
 -- | Integers modulo some positive integer m.
 -- |
@@ -123,5 +123,6 @@ enumerate =
   in
     mkZ 0 :| (if m == 1 then [] else map mkZ (Array.range 1 (m - 1)))
 
-instance arbitraryZ :: Pos m => Arbitrary (Z m) where
-  arbitrary = elements enumerate
+-- | Create a random generator for members of Z_m.
+genZ :: forall m n. MonadGen m => Pos n => m (Z n)
+genZ = Z <$> chooseInt 0 (toInt (undefined :: n) - 1)
