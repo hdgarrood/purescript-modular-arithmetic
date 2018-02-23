@@ -8,7 +8,10 @@ module Data.ModularArithmetic
   ) where
 
 import Prelude
+
 import Data.Array as Array
+import Data.Enum (class BoundedEnum, class Enum, Cardinality(..))
+import Data.Maybe (Maybe(..))
 import Data.NonEmpty (NonEmpty, (:|))
 import Data.Typelevel.Num (class Pos, type (:*), D1, D2, D3, D5, D7, toInt)
 import Data.Typelevel.Undefined (undefined)
@@ -33,6 +36,22 @@ newtype Z m = Z Int
 derive newtype instance eqZ :: Eq (Z m)
 derive newtype instance ordZ :: Ord (Z m)
 derive newtype instance showZ :: Show (Z m)
+
+instance boundedZ :: Pos m => Bounded (Z m) where
+  bottom = zero
+  top    = Z $ toInt (undefined :: m) - 1
+
+instance enumZ :: Pos m => Enum (Z m) where
+  succ z = let z' = z + one
+           in if z' > z then Just z' else Nothing
+  pred z = let z' = z - one
+           in if z' < z then Just z' else Nothing
+
+instance boundedEnumZ :: Pos m => BoundedEnum (Z m) where
+  cardinality = Cardinality (toInt (undefined :: m) - 1)
+  toEnum x = let z = mkZ x
+             in if runZ z == x then Just z else Nothing
+  fromEnum = runZ
 
 -- | Smart constructor for `Z` values.
 mkZ :: forall m. Pos m => Int -> Z m
