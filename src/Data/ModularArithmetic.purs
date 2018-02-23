@@ -65,7 +65,7 @@ instance semiringZ :: Pos m => Semiring (Z m) where
   add (Z x) (Z y) = mkZ (add x y)
   mul (Z x) (Z y) = mkZ (mul x y)
   zero = Z 0
-  one = Z 1
+  one = mkZ 1
 
 instance ringZ :: Pos m => Ring (Z m) where
   sub (Z x) (Z y) = mkZ (sub x y)
