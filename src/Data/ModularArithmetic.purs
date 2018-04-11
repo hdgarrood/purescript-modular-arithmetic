@@ -12,12 +12,13 @@ import Prelude
 
 import Data.Array as Array
 import Data.Enum (class BoundedEnum, class Enum, Cardinality(..))
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromJust)
 import Data.NonEmpty (NonEmpty, (:|))
 import Data.Typelevel.Num (class Pos, type (:*), D1, D2, D3, D5, D7, toInt)
 import Data.Typelevel.Undefined (undefined)
 import Test.QuickCheck (class Arbitrary)
 import Test.QuickCheck.Gen (elements)
+import Partial.Unsafe (unsafePartial)
 
 -- | Integers modulo some positive integer m.
 -- |
@@ -92,9 +93,15 @@ instance ringZ :: Pos m => Ring (Z m) where
 
 instance commutativeRingZ :: Pos m => CommutativeRing (Z m)
 
+instance divisionRingZ :: Prime m => DivisionRing (Z m) where
+  -- The unsafePartial here is justifiable because
+  --   a) recip is undefined when applied to 0, and
+  --   b) the `Prime m` constraint ensures that m is coprime to any input.
+  recip = unsafePartial (fromJust <<< inverse)
+
 instance euclideanRingZ :: Prime m => EuclideanRing (Z m) where
   degree _ = 1
-  div x y = x * inverse y
+  div x y = x * recip y
   mod _ _ = Z 0
 
 instance fieldZ :: Prime m => Field (Z m)
@@ -103,17 +110,18 @@ instance fieldZ :: Prime m => Field (Z m)
 modulus :: forall m. Pos m => Z m -> Int
 modulus _ = toInt (undefined :: m)
 
--- | Compute a multiplicative inverse of some number in Z_m. Note that an
--- | inverse is only guaranteed to exist if m is prime (which is required by a
--- | constraint on this function).
--- Adapted from https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Modular_integers
-inverse :: forall m. Prime m => Z m -> Z m
-inverse (Z a) = mkZ (go 0 n 1 a)
+-- | Compute a multiplicative inverse of some nonzero number in Z_m. Note that
+-- | an inverse exists if and only if the input and `m` are coprime. If this is
+-- | not the case, this function returns `Nothing`.
+inverse :: forall m. Pos m => Z m -> Maybe (Z m)
+inverse (Z a) = map mkZ (go 0 n 1 a)
   where
     n = toInt (undefined :: m)
 
-    go t _ _ 0 =
-      t
+    go t r _ 0 =
+      if r > 1
+        then Nothing
+        else Just t
     go t r newt newr =
       let
         quot = r / newr
