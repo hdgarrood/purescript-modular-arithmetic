@@ -21,18 +21,6 @@ main = do
   checkComposite (Proxy :: Proxy D8)
   checkComposite (Proxy :: Proxy D9)
 
-checkPrime :: forall p. Prime p => Proxy p -> _
-checkPrime _ = do
-  let p = Proxy :: Proxy (Z p)
-
-  log "Checking 'inverses' law"
-  quickCheck (inverses :: Z p -> _)
-  checkSemiring p
-  checkRing p
-  checkCommutativeRing p
-  checkEuclideanRing p
-  checkField p
-
 checkComposite :: forall m. Pos m => Proxy m -> _
 checkComposite _ = do
   let p = Proxy :: Proxy (Z m)
@@ -42,6 +30,14 @@ checkComposite _ = do
   checkSemiring p
   checkRing p
   checkCommutativeRing p
+
+checkPrime :: forall p. Prime p => Proxy p -> _
+checkPrime _ = do
+  let p = Proxy :: Proxy (Z p)
+
+  checkComposite (Proxy :: Proxy p)
+  checkEuclideanRing p
+  checkField p
 
 coprime :: Int -> Int -> Boolean
 coprime a b = abs (gcd a b) == 1
