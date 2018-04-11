@@ -2,9 +2,10 @@ module Data.ModularArithmetic
   ( Z
   , mkZ
   , runZ
-  , class Prime
+  , modulus
   , inverse
   , enumerate
+  , class Prime
   ) where
 
 import Prelude
@@ -97,6 +98,10 @@ instance euclideanRingZ :: Prime m => EuclideanRing (Z m) where
   mod _ _ = Z 0
 
 instance fieldZ :: Prime m => Field (Z m)
+
+-- | Convenience function for accessing `m` at the value level.
+modulus :: forall m. Pos m => Z m -> Int
+modulus _ = toInt (undefined :: m)
 
 -- | Compute a multiplicative inverse of some number in Z_m. Note that an
 -- | inverse is only guaranteed to exist if m is prime (which is required by a
