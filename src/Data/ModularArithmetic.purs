@@ -5,16 +5,18 @@ module Data.ModularArithmetic
   , modulus
   , inverse
   , enumerate
-  , class Prime
+  , module P
   ) where
 
 import Prelude
+
+import Data.ModularArithmetic.Primality as P
 
 import Data.Array as Array
 import Data.Enum (class BoundedEnum, class Enum, Cardinality(..))
 import Data.Maybe (Maybe(..), fromJust)
 import Data.NonEmpty (NonEmpty, (:|))
-import Data.Typelevel.Num (class Pos, type (:*), D1, D2, D3, D5, D7, toInt)
+import Data.Typelevel.Num (class Pos, toInt)
 import Data.Typelevel.Undefined (undefined)
 import Test.QuickCheck (class Arbitrary)
 import Test.QuickCheck.Gen (elements)
@@ -68,20 +70,6 @@ mkZ x =
 runZ :: forall m. Z m -> Int
 runZ (Z x) = x
 
--- | This class specifies that a type-level integer is *prime*; that is, it
--- | has exactly 2 divisors: itself, and 1.
--- |
--- | Sadly, only a small number of primes have instances right now. Hopefully
--- | this will change in the future.
-class Pos m <= Prime m
-
--- TODO: More primes
-instance prime2 :: Prime D2
-instance prime3 :: Prime D3
-instance prime5 :: Prime D5
-instance prime7 :: Prime D7
-instance prime11 :: Prime (D1 :* D1)
-
 instance semiringZ :: Pos m => Semiring (Z m) where
   add (Z x) (Z y) = mkZ (add x y)
   mul (Z x) (Z y) = mkZ (mul x y)
@@ -93,18 +81,18 @@ instance ringZ :: Pos m => Ring (Z m) where
 
 instance commutativeRingZ :: Pos m => CommutativeRing (Z m)
 
-instance divisionRingZ :: Prime m => DivisionRing (Z m) where
+instance divisionRingZ :: P.Prime m => DivisionRing (Z m) where
   -- The unsafePartial here is justifiable because
   --   a) recip is undefined when applied to 0, and
   --   b) the `Prime m` constraint ensures that m is coprime to any input.
   recip = unsafePartial (fromJust <<< inverse)
 
-instance euclideanRingZ :: Prime m => EuclideanRing (Z m) where
+instance euclideanRingZ :: P.Prime m => EuclideanRing (Z m) where
   degree _ = 1
   div x y = x * recip y
   mod _ _ = Z 0
 
-instance fieldZ :: Prime m => Field (Z m)
+instance fieldZ :: P.Prime m => Field (Z m)
 
 -- | Convenience function for accessing `m` at the value level.
 modulus :: forall m. Pos m => Z m -> Int

@@ -21,6 +21,13 @@ main = do
   checkComposite (Proxy :: Proxy D8)
   checkComposite (Proxy :: Proxy D9)
 
+  case reifyPrime 101 checkPrime' of
+    Just go ->
+      go
+    Nothing -> do
+      log "101 is not prime apparently."
+      quickCheck false
+
 checkComposite :: forall m. Pos m => Proxy m -> _
 checkComposite _ = do
   let p = Proxy :: Proxy (Z m)
@@ -38,6 +45,10 @@ checkPrime _ = do
   checkComposite (Proxy :: Proxy p)
   checkEuclideanRing p
   checkField p
+
+-- For use with reifyPrime
+checkPrime' :: forall p. Prime p => p -> _
+checkPrime' _ = checkPrime (Proxy :: Proxy p)
 
 coprime :: Int -> Int -> Boolean
 coprime a b = abs (gcd a b) == 1

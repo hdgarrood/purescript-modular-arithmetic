@@ -20,7 +20,8 @@
     "purescript-console": "^3.0.0",
     "purescript-quickcheck": "^4.0.0",
     "purescript-arrays": "^4.0.1",
-    "purescript-nonempty": "^4.0.0"
+    "purescript-nonempty": "^4.0.0",
+    "purescript-lists": "^4.12.0"
   },
   "devDependencies": {
     "purescript-psci-support": "^3.0.0",
