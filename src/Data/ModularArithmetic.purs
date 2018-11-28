@@ -5,12 +5,12 @@ module Data.ModularArithmetic
   , modulus
   , inverse
   , enumerate
-  , module P
+  , module Primality
   ) where
 
 import Prelude
 
-import Data.ModularArithmetic.Primality as P
+import Data.ModularArithmetic.Primality (class Prime, isPrime, primeFactors, reifyPrime) as Primality
 
 import Data.Array as Array
 import Data.Enum (class BoundedEnum, class Enum, Cardinality(..))
@@ -81,18 +81,16 @@ instance ringZ :: Pos m => Ring (Z m) where
 
 instance commutativeRingZ :: Pos m => CommutativeRing (Z m)
 
-instance divisionRingZ :: P.Prime m => DivisionRing (Z m) where
+instance divisionRingZ :: Primality.Prime m => DivisionRing (Z m) where
   -- The unsafePartial here is justifiable because
   --   a) recip is undefined when applied to 0, and
   --   b) the `Prime m` constraint ensures that m is coprime to any input.
   recip = unsafePartial (fromJust <<< inverse)
 
-instance euclideanRingZ :: P.Prime m => EuclideanRing (Z m) where
+instance euclideanRingZ :: Primality.Prime m => EuclideanRing (Z m) where
   degree _ = 1
   div x y = x * recip y
   mod _ _ = Z 0
-
-instance fieldZ :: P.Prime m => Field (Z m)
 
 -- | Convenience function for accessing `m` at the value level.
 modulus :: forall m. Pos m => Z m -> Int

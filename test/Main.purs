@@ -4,11 +4,11 @@ import Prelude
 import Data.Ord (abs)
 import Data.ModularArithmetic
 import Data.Maybe
-import Control.Monad.Eff.Console (log, logShow)
+import Effect.Console (log, logShow)
 import Data.Typelevel.Num (class Pos, D1, D3, D5, D7, D8, D9, D11)
 import Test.QuickCheck (class Arbitrary, Result, arbitrary, quickCheck, (<?>))
 import Test.QuickCheck.Gen (elements)
-import Test.QuickCheck.Laws.Data (checkCommutativeRing, checkEuclideanRing, checkField, checkRing, checkSemiring)
+import Test.QuickCheck.Laws.Data (checkCommutativeRing, checkEuclideanRing, checkRing, checkSemiring)
 import Type.Proxy (Proxy(..))
 
 main = do
@@ -44,7 +44,6 @@ checkPrime _ = do
 
   checkComposite (Proxy :: Proxy p)
   checkEuclideanRing p
-  checkField p
 
 -- For use with reifyPrime
 checkPrime' :: forall p. Prime p => p -> _
