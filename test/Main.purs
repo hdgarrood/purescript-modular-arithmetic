@@ -3,7 +3,6 @@ module Test.Main where
 import Data.Enum (class BoundedEnum, class Enum, Cardinality(..))
 import Data.Maybe
 import Data.ModularArithmetic
-import Data.ModularArithmetic.Primality as Primality
 import Data.Ord (abs)
 import Data.Typelevel.Num (class Pos, D1, D3, D5, D7, D8, D9, D11)
 import Effect.Console (log, logShow)
@@ -24,8 +23,8 @@ derive newtype instance boundedEnumArbZ :: Pos m => BoundedEnum (ArbZ m)
 derive newtype instance semiringArbZ :: Pos m => Semiring (ArbZ m)
 derive newtype instance ringArbZ :: Pos m => Ring (ArbZ m)
 derive newtype instance commutativeRingArbZ :: Pos m => CommutativeRing (ArbZ m)
-derive newtype instance divisionRingArbZ :: Primality.Prime m => DivisionRing (ArbZ m)
-derive newtype instance euclideanRingArbZ :: Primality.Prime m => EuclideanRing (ArbZ m)
+derive newtype instance divisionRingArbZ :: Prime m => DivisionRing (ArbZ m)
+derive newtype instance euclideanRingArbZ :: Prime m => EuclideanRing (ArbZ m)
 
 instance arbitraryArbZ :: Pos m => Arbitrary (ArbZ m) where
   arbitrary = ArbZ <$> genZ
