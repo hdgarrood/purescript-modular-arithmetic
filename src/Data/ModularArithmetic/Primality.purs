@@ -21,14 +21,14 @@ import Unsafe.Coerce (unsafeCoerce)
 -- | Prime factors are returned in increasing order. For example:
 -- |
 -- | ```purescript
--- | > trialDivision 12
+-- | > primeFactors 12
 -- | (2 : 2 : 3 : Nil)
 -- | ```
 -- |
 -- | Passing in any number less than 2 will return an empty list.
 -- |
 -- | ```purescript
--- | > trialDivision (-12)
+-- | > primeFactors (-12)
 -- | Nil
 -- | ```
 -- |
