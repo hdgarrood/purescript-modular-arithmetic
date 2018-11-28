@@ -5,6 +5,7 @@ module Data.ModularArithmetic
   , modulus
   , inverse
   , enumerate
+  , genZ
   , module Primality
   ) where
 
@@ -12,14 +13,14 @@ import Prelude
 
 import Data.ModularArithmetic.Primality (class Prime, isPrime, primeFactors, reifyPrime) as Primality
 
+import Control.Monad.Gen (class MonadGen)
+import Control.Monad.Gen as Gen
 import Data.Array as Array
 import Data.Enum (class BoundedEnum, class Enum, Cardinality(..))
 import Data.Maybe (Maybe(..), fromJust)
 import Data.NonEmpty (NonEmpty, (:|))
 import Data.Typelevel.Num (class Pos, toInt)
 import Data.Typelevel.Undefined (undefined)
-import Test.QuickCheck (class Arbitrary)
-import Test.QuickCheck.Gen (elements)
 import Partial.Unsafe (unsafePartial)
 
 -- | Integers modulo some positive integer m.
@@ -122,5 +123,7 @@ enumerate =
   in
     mkZ 0 :| (if m == 1 then [] else map mkZ (Array.range 1 (m - 1)))
 
-instance arbitraryZ :: Pos m => Arbitrary (Z m) where
-  arbitrary = elements enumerate
+-- | A random generator for elements of Z_m; selects any value of Z_m with
+-- | each value being equally likely to be selected.
+genZ :: forall gen m. MonadGen gen => Pos m => gen (Z m)
+genZ = Gen.elements enumerate

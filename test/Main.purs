@@ -1,15 +1,34 @@
 module Test.Main where
 
-import Prelude
-import Data.Ord (abs)
-import Data.ModularArithmetic
+import Data.Enum (class BoundedEnum, class Enum, Cardinality(..))
 import Data.Maybe
-import Effect.Console (log, logShow)
+import Data.ModularArithmetic
+import Data.ModularArithmetic.Primality as Primality
+import Data.Ord (abs)
 import Data.Typelevel.Num (class Pos, D1, D3, D5, D7, D8, D9, D11)
+import Effect.Console (log, logShow)
+import Prelude
 import Test.QuickCheck (class Arbitrary, Result, arbitrary, quickCheck, (<?>))
 import Test.QuickCheck.Gen (elements)
 import Test.QuickCheck.Laws.Data (checkDivisionRing, checkCommutativeRing, checkEuclideanRing, checkRing, checkSemiring)
 import Type.Proxy (Proxy(..))
+
+newtype ArbZ m = ArbZ (Z m)
+
+derive newtype instance eqArbZ :: Eq (ArbZ m)
+derive newtype instance ordArbZ :: Ord (ArbZ m)
+derive newtype instance showArbZ :: Show (ArbZ m)
+derive newtype instance boundedArbZ :: Pos m => Bounded (ArbZ m)
+derive newtype instance enumArbZ :: Pos m => Enum (ArbZ m)
+derive newtype instance boundedEnumArbZ :: Pos m => BoundedEnum (ArbZ m)
+derive newtype instance semiringArbZ :: Pos m => Semiring (ArbZ m)
+derive newtype instance ringArbZ :: Pos m => Ring (ArbZ m)
+derive newtype instance commutativeRingArbZ :: Pos m => CommutativeRing (ArbZ m)
+derive newtype instance divisionRingArbZ :: Primality.Prime m => DivisionRing (ArbZ m)
+derive newtype instance euclideanRingArbZ :: Primality.Prime m => EuclideanRing (ArbZ m)
+
+instance arbitraryArbZ :: Pos m => Arbitrary (ArbZ m) where
+  arbitrary = ArbZ <$> genZ
 
 main = do
   checkPrime (Proxy :: Proxy D3)
@@ -31,10 +50,10 @@ main = do
 -- | If m is composite, then Z m should be a commutative ring.
 checkComposite :: forall m. Pos m => Proxy m -> _
 checkComposite _ = do
-  let p = Proxy :: Proxy (Z m)
+  let p = Proxy :: Proxy (ArbZ m)
 
   log "Checking 'inverses' law"
-  quickCheck (inverses :: Z m -> _)
+  quickCheck (inverses :: ArbZ m -> _)
   checkSemiring p
   checkRing p
   checkCommutativeRing p
@@ -42,7 +61,7 @@ checkComposite _ = do
 -- | If p is prime, then Z p should be a field.
 checkPrime :: forall p. Prime p => Proxy p -> _
 checkPrime _ = do
-  let p = Proxy :: Proxy (Z p)
+  let p = Proxy :: Proxy (ArbZ p)
 
   checkComposite (Proxy :: Proxy p)
   checkEuclideanRing p
@@ -55,8 +74,8 @@ checkPrime' _ = checkPrime (Proxy :: Proxy p)
 coprime :: Int -> Int -> Boolean
 coprime a b = abs (gcd a b) == 1
 
-inverses :: forall m. Pos m => Z m -> Result
-inverses x =
+inverses :: forall m. Pos m => ArbZ m -> Result
+inverses (ArbZ x) =
   case inverse x of
     Just y ->
       x * y == one
