@@ -8,7 +8,7 @@ import Effect.Console (log, logShow)
 import Data.Typelevel.Num (class Pos, D1, D3, D5, D7, D8, D9, D11)
 import Test.QuickCheck (class Arbitrary, Result, arbitrary, quickCheck, (<?>))
 import Test.QuickCheck.Gen (elements)
-import Test.QuickCheck.Laws.Data (checkCommutativeRing, checkEuclideanRing, checkRing, checkSemiring)
+import Test.QuickCheck.Laws.Data (checkDivisionRing, checkCommutativeRing, checkEuclideanRing, checkRing, checkSemiring)
 import Type.Proxy (Proxy(..))
 
 main = do
@@ -28,6 +28,7 @@ main = do
       log "101 is not prime apparently."
       quickCheck false
 
+-- | If m is composite, then Z m should be a commutative ring.
 checkComposite :: forall m. Pos m => Proxy m -> _
 checkComposite _ = do
   let p = Proxy :: Proxy (Z m)
@@ -38,12 +39,14 @@ checkComposite _ = do
   checkRing p
   checkCommutativeRing p
 
+-- | If p is prime, then Z p should be a field.
 checkPrime :: forall p. Prime p => Proxy p -> _
 checkPrime _ = do
   let p = Proxy :: Proxy (Z p)
 
   checkComposite (Proxy :: Proxy p)
   checkEuclideanRing p
+  checkDivisionRing p
 
 -- For use with reifyPrime
 checkPrime' :: forall p. Prime p => p -> _
